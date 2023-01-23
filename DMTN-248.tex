@@ -54,112 +54,164 @@ They are the only data product that is both world public (exempt from any propri
 the latter meaning that they are distributed to community brokers and not solely available via the Rubin Science Platform (RSP).
 
 The alert stream and its packets' contents are described in the Data Products Definitions Document (DPDD; \citeds{LSE-163}).
-The motivation behind their design is to rapidly distribute all of the LSST data about a difference-image detection which a broker (or their users) would need to assess, classify, and prioritize the alert for follow-up observations within minutes.
+The motivation behind their design is to rapidly distribute all of the LSST data about a difference-image detection which a 
+broker (or their users) would need to assess, classify, and prioritize the alert for follow-up observations within minutes.
 
 This document considers options for the alert stream and alert packet contents to maximize science.
 Most options look at either reducing the packet size, or improving the scientific utility of packet contents.
 
 \textbf{Reduce packet size}:
-Some options below aim to reduce the size of the alert packet, potentially enabling wider full-stream redistribution to downstream brokers or avoiding bottlenecks in alert distribution for crowded fields.
-The size of an alert packet is estimated to be 82 KB, based on simulations described in Section 3.5 of the DPDD (see also the Alerts Key Numbers document; \citeds{DMTN-102}).
-Reducing packet size was more of a concern in the earlier days of construction, before the decision to support seven full-stream brokers was made.
+The size of an alert packet is estimated to be 82 KB, based on simulations described in Section 3.5 of the DPDD 
+(see also the Alerts Key Numbers document; \citeds{DMTN-102}).
+Reducing packet size was more of a concern in the earlier days of construction, in order to potentially enable alert 
+distribution to additional brokers.
+However, even though the the decision to support seven full-stream brokers has been made, considerations of alert packet 
+size are still relevant to, e.g., potentially enable wider full-stream redistribution to downstream brokers or avoiding 
+bottlenecks in alert distribution for crowded fields.
 
 \textbf{Improve scientific utility}:
-Other options below aim to improve the scientific utility of alert packet contents by providind additional or differently-formatted data.
+Other options below aim to improve the scientific utility of alert packet contents by providind additional or 
+differently-formatted data.
 
-This document also includes a brief discussion about the science impacts for the various ways of dealing with delayed alerts when, e.g., there are $>$40000 alerts per visit (Section \ref{sec:delayed}).
+This document also includes a brief discussion about the science impacts for the various ways of dealing with 
+delayed alerts when, e.g., there are $>$40000 alerts per visit (Section \ref{sec:delayed}).
 
 
-\section{Remove historical records}\label{sec:histories}
+\section{Historical records}\label{sec:histories}
+
+\textbf{Proposal}: Instead of including the history in every packet, brokers could retrieve it only the fraction 
+of the alerts for which it is needed.
 
 Alert packets will include ``\textit{any DiaSource and DiaForcedSource records that exist, and difference image noise
 estimates where they do not, taken from the previous 12 months}" (Section 3.5.1 of the DPDD).
 The history would account for about 27 KB, or about 33\% of the total alert packet size.
 
-The motivation for including historical records in alert packets is to enable brokers to (re-)assess the \emph{full} time-domain event in order to make a robust classification (or prioritization) for follow-up.
+The motivation for including historical records in alert packets is to enable brokers to (re-)assess the \emph{full} 
+time-domain event in order to make a robust classification (or prioritization) for follow-up.
 
-The proposal is that instead of including the history in every packet, brokers could retrieve it only the fraction of the alerts for which it is needed.
-
-Brokers (and their users) would still need the list of the unique identifers for the DiaSource and DiaForcedSource records associated with the same DiaOject as the alert-triggering DiaSource, even if their full records were not included in the alert packet.
-Removing this list is \emph{not} being considered, for the following reasons:
+Brokers (and their users) would still need the list of the unique identifers for the DiaSource and DiaForcedSource 
+records associated with the same DiaOject as the alert-triggering DiaSource, even if their full records were not included 
+in the alert packet.
+Removing this list of unique identifiers is \emph{not} being considered as part of this proposal for the following reasons:
 
 \begin{enumerate}
-\item The LSST Prompt Processing pipeline associates DiaSources into DiaObjects, and it would be challenging, time-consuming, and redundant to have brokers repeat this for all new alerts.
-\item The association of DiaSources into DiaObjects is probabilistic, and in rare cases might change over time (e.g., strongly-lensed supernovae, or line-of-sight transient superpositions, where two distinct difference-image sources are blended/separated in poor/good seeing). In such cases the set of all DiaSource records which compose the history might change.
+\item The LSST Prompt Processing pipeline associates DiaSources into DiaObjects, and it would be challenging, time-consuming, 
+and redundant to have brokers repeat this for all new alerts.
+\item The association of DiaSources into DiaObjects is probabilistic, and in rare cases might change over time 
+(e.g., strongly-lensed supernovae, or line-of-sight transient superpositions, where two distinct difference-image sources are 
+blended/separated in poor/good seeing).
+In such cases the set of all DiaSource records which compose the history might change.
 \end{enumerate}
 
-Brokers that save all past alerts in their own archives would be able to retrieve the full records for associated DiaSources locally (but not DiaForcedSources, as they would never have been in an alert packet).
-Brokers with authenticated RSP access would be able to query the PPDB to retrieve the full records for associated DiaSources and DiaForcedSources.
-Brokers that do not save all past alerts and/or do not have authenticated RSP access to the PPDB would have no historical information aside from the number of associated DiaSources (i.e., the number of past detections).
+Brokers that save all past alerts in their own archives would be able to retrieve the full records for associated DiaSources 
+locally (but not DiaForcedSources, as they would never have been in an alert packet).
+Brokers with authenticated RSP access would be able to query the PPDB to retrieve the full records for associated DiaSources 
+and DiaForcedSources.
+Brokers that do not save all past alerts and/or do not have authenticated RSP access to the PPDB would have no historical 
+information aside from the number of associated DiaSources (i.e., the number of past detections).
 
-At best, the lack of historical records in alerts would add a layer of complication and a potential delay to the brokers' functionailty, and inhibit the scientific assessment of time-domain events.
+At best, the lack of historical records in alerts would add a layer of complication and a potential delay to the brokers' 
+functionailty, and inhibit the scientific assessment of time-domain events.
 At worst, it would be a severe risk to brokers' ability to process alerts.
 
 \textbf{Recommendation}: Do not remove historial records, it imposes a risk to time-domain science.
 
 
-\section{Remove postage stamps}\label{sec:stamps}
+\section{Postage stamps}\label{sec:stamps}
 
-The postage stamps are, at minimum, 6$\times$6 arcseconds (30$\times$30 pixels) and contain flux, variance, and mask extensions for both the template and difference image, plus a header of metadata (DPDD).
+\textbf{Proposal}: Remove image stamps from the alert packets, in favor of one of the two options below, 
+with which brokers could instead retrieve the postage stamps for only those alerts for which it is needed 
+(e.g., unclassified time-domain events).
+
+The postage stamps are, at minimum, 6$\times$6 arcseconds (30$\times$30 pixels) and contain flux, variance, 
+and mask extensions for both the template and difference image, plus a header of metadata (DPDD).
 The stamps would accounts for about 18 KB, or about 20\% of the total alert packet size.
 
-The motivation for including postage stamps in the alert packets is to enable brokers to use image-based machine learning tools (e.g., custom real/bogus scores; host+supernova classifiers), 2-dimenstional flux distribution (e.g., trailed sources; cometary outbursts), or environmental context (e.g., field crowdedness) to classify or prioritze alerts.
+The motivation for including postage stamps in the alert packets is to enable brokers to use image-based 
+machine learning tools (e.g., custom real/bogus scores; host+supernova classifiers), 2-dimenstional flux distribution 
+(e.g., trailed sources; cometary outbursts), or environmental context (e.g., field crowdedness) to classify or prioritze alerts.
 
-The proposal is to remove image stamps from the alert packets, in favor of one of the two options below, with which brokers could instead retrieve the postage stamps for only those alerts for which it is needed (e.g., unclassified time-domain events).
-
+Two options to replace including postage stamps in every alert are:
 \begin{enumerate}
-\item \textbf{Image cutout service}. Brokers with authenticated RSP access could use the image cutout service to create and retrieve stamps.
-\item \textbf{URL to the postage stamp}. A URL to could be put into the alert instead of the postage stamp which points to an automated public cutout service or the pre-made postage stamps on a server.
+\item \textbf{Image cutout service}. Brokers with authenticated RSP access could use the image cutout service to 
+create and retrieve stamps.
+\item \textbf{URL to the postage stamp}. A URL to could be put into the alert instead of the postage stamp which 
+points to an automated public cutout service or the pre-made postage stamps on a server.
 \end{enumerate}
 
-The 80 hour embargo on all new images and difference images renders the option to use an image cutout service non-viable (regardless of whether it is via the RSP or a public service).
+Regarding the first option, the 80 hour embargo on all new images and difference images renders the option to use 
+an image cutout service non-viable (regardless of whether it is via the RSP or a public service).
 
-The option for Rubin Observatory to create and maintain a public server of pre-made postage stamps has the advantage that brokers (or downstream brokers) do not need to save the stamps, and can retrieve them at any time.
-
-However, this option also has two main drawbacks: it is not currently planned for development, and it could impose a delay on brokers' alert processing and analysis.
+Regarding the second option, this would require Rubin Observatory to create and maintain a public server of 
+pre-made postage stamps has the advantage that brokers (or downstream brokers) do not need to save the stamps, 
+and can retrieve them at any time.
+However, this option also has two main drawbacks: it is not currently planned for development, and it could impose 
+a delay on brokers' alert processing and analysis.
 The latter is unlikely to cause a bottleneck whe multiple brokers attempt to retrieve large numbers of stamps simulataneously.
-For example, if 5 brokers retrieve 500 stamp sets per visit, that's 2500 stamp sets every 35 seconds, and at 18 KB per stamp set the data rate would be 10.5 Mbps (5\% of one full alert stream).
+For example, if 5 brokers retrieve 500 stamp sets per visit, that's 2500 stamp sets every 35 seconds, and at 18 KB 
+per stamp set the data rate would be 10.5 Mbps (5\% of one full alert stream).
 
 \textbf{Recommendation}: Do not remove postage stamps, it imposes a risk to time-domain science.
 
 
-\section{Provide large multi-resolution postage stamps}\label{sec:bigstamps}
+\section{Large multi-resolution postage stamps}\label{sec:bigstamps}
 
-The proposal is to provide larger multi-resolution postage stamps in the alert packets by binning the pixels with a bin size that increases towards the edges of the images, such that several arcminutes can be included.
+\textbf{Proposal}: Provide larger multi-resolution postage stamps in the alert packets by binning 
+the pixels with a bin size that increases towards the edges of the images, such that several 
+arcminutes can be included.
 
-The motivation for this proposal is to enable time-domain science that relies on the rapid association of low-redshift transients with their wide-area host galaxies, using algorithms such as ``DELIGHT: Deep Learning Identification of Galaxy Hosts of Transients using Multiresolution Images" (Förster et al. 2022).
+The motivation for this proposal is to enable time-domain science that relies on the rapid association 
+of low-redshift transients with their wide-area host galaxies, using algorithms such as 
+``DELIGHT: Deep Learning Identification of Galaxy Hosts of Transients using Multiresolution Images" (Förster et al. 2022).
 
-The default 6$\times$6 arcsecond postage stamp size is large enough to contain the angular diameter (30 kpc) of a Milky Way-like galaxy at a redshift of 0.5, which will be a fairly typical supernova host galaxy in the LSST data set.
+The default 6$\times$6 arcsecond postage stamp size is large enough to contain the angular diameter (30 kpc) 
+of a Milky Way-like galaxy at a redshift of 0.5, which will be a fairly typical supernova host galaxy in the LSST data set.
 The fraction of all alerts that will be low-redshift transients with wide-area host galaxies will be $<$1\% \citedsp{DMTN-102}.
 
-Host association will already be included in the alert packet as part of the DiaObject, as described in \citeds{DMTN-151} and in Table 3 of the DPDD, including potential nearby extended and low-redshift galaxies (see columns nearbyExtObj and nearbyLowzGal).
+Host association will already be included in the alert packet as part of the DiaObject, as described in \citeds{DMTN-151} 
+and in Table 3 of the DPDD, including potential nearby extended and low-redshift galaxies (see columns nearbyExtObj and nearbyLowzGal).
 
-This type of host-galaxy identification could be done by accessing the template images (which are not subject to the 80 hour embargo) via the image cutout service.
+It is expected that this type of host-galaxy identification could be done by accessing the template images 
+(which are not subject to the 80 hour embargo) via the image cutout service, via which large-area cutouts could be made.
 
-\textbf{Recommendation}: At this time, do not increase the size of postage stamps.
+Although the context provided by larger postage stamps have also been shown to better identify DiaSources that are glints
+(rotating debris in low earth orbit that appears as a row of point sources), ways to identify and flag DiaSources
+as potential glints in the AP pipeline are underway, instead of leaving this identification solely to brokers.
+
+Furthermore, although the multi-resolution aspect of the proposal aims to provide a larger area without significantly
+adding to the size of the alert packet, it is currently unclear, e.g., how much extra header information is added, or whether the
+FITS would need multiple extensions.
+
+\textbf{Recommendation}: At this time, do not increase the size of postage stamps, but potentially reconsider in the future.
 
 
-\section{Compress alert packets}\label{sec:compression}
+\section{Packet compression}\label{sec:compression}
+
+\textbf{Proposal}: Compress alert packets to reduce their size.
 
 The application of gzip compression could further reduce the size of a full alert to 65 KB (80\%).
-This might help to avoid alert distribution bottlenecks, lower the cost for brokers' storage needs, and potentially enable additional full streams in the future -- all of which could positively impact time-domain science with the LSST.
+This might help to avoid alert distribution bottlenecks, lower the cost for brokers' storage needs, and potentially enable 
+additional full streams in the future -- all of which could positively impact time-domain science with the LSST.
 
 However, the time and computational resources required to compress the alert packets needs to be considered.
-For example, gzip compression at 50 MB/s to compress 10000 alerts could take 10000 $\times$ 0.08 MB per alert, 50 MB/s, or 16 seconds, which is very significant in light of the 60 second alert distribution timescale. 
+For example, gzip compression at 50 MB/s to compress 10000 alerts could take 10000 $\times$ 0.08 MB per alert, 50 MB/s, or 
+16 seconds, which is very significant in light of the 60 second alert distribution timescale. 
 
 Furthermore, compressing the alert packets forces brokers to then decompress the alerts on arrival, which would incur further delay.
 Science goals requiring very low-latency alerts distribution might be negatively impacted by compression.
 
-Compression should only be consisdered if an algorithm could provide a compression rate of 10 MB/s, requiring only a few seconds to compress a visit's worth of alerts, or if the alert distribution latency requirement is relaxed from 1 minute.
+Compression should only be consisdered if an algorithm could provide a compression rate of 10 MB/s, requiring only a few seconds 
+to compress a visit's worth of alerts, or if the alert distribution latency requirement is relaxed from 1 minute.
 
 \textbf{Recommendation}: Do not compress alert packets, it imposes a risk to rapid time-domain science.
 
 
-\section{Enable multiple packet formats}\label{sec:multiformats}
+\section{Multiple packet formats}\label{sec:multiformats}
 
-The proposal is to allow brokers to specify whether their stream should have histories or postage stamps removed.
+\textbf{Proposal}: Allow brokers to specify whether their stream should have histories or postage stamps removed.
 
-The main motivation here is not scientific, but to help reduce brokers' processing costs spent removing unneeded information from alert packets. 
+The main motivation here is not scientific, but to help reduce brokers' processing costs spent removing unneeded information 
+from alert packets. 
 
 There are a few drawbacks to this proposal, but they are mostly technical:
 
@@ -174,20 +226,25 @@ These drawbacks could impose a risk to the particular science goals of brokers u
 \textbf{Recommendation}: None at this time, this is primarily a technical question with little science impact.
 
 
-\section{Provide pre-filtered streams}\label{sec:prefilter}
+\section{Pre-filtered streams}\label{sec:prefilter}
 
-The proposal is to allow brokers to request a pre-filtered alert stream, for example to only include alerts in a certain sky region or which meet other criteria (e.g., brightness limits, number of past detections).
+\textbf{Proposal}: Allow brokers to request a pre-filtered alert stream, for example to only include alerts in a certain sky 
+region or which meet other criteria (e.g., brightness limits, number of past detections).
 
-As with the multiple packet formats, the main motivation here is not scientific, but to help reduce brokers' processing costs spent recieving unwanted alerts, or to enable Rubin Observatory to distribute alerts to more brokers.
+As with the multiple packet formats, the main motivation here is not scientific, but to help reduce brokers' processing costs 
+spent recieving unwanted alerts, or to enable Rubin Observatory to distribute alerts to more brokers.
 
-For example, due to the exponential relationship between the number of variable stars and their variability amplitude, and also that of volume and distance modulus, an apparent magnitude limit that is 1 mag brighter than the nominal 5-sigma DiaSource detection limit could reduce the alert stream data rate by 50\%.
+For example, due to the exponential relationship between the number of variable stars and their variability amplitude, and 
+also that of volume and distance modulus, an apparent magnitude limit that is 1 mag brighter than the nominal 5-sigma DiaSource 
+detection limit could reduce the alert stream data rate by 50\%.
 
-However, all seven full-stream brokers have committed to recieving the full stream, and the term downstream broker refers to brokers which will ingest a filtered stream of alerts from the full-stream brokers.
+However, all seven full-stream brokers have committed to recieving the full stream, and the term downstream broker refers to 
+brokers which will ingest a filtered stream of alerts from the full-stream brokers.
 
 \textbf{Recommendation}: There is no need for Rubin Observatory to provide pre-filtered streams to brokers.
 
 
-\section{Distribute delayed alerts as soon as possible}\label{sec:delayed}
+\section{When and how to distribute delayed alerts}\label{sec:delayed}
 
 The Data Management System (DMS) is required to support the distribution of at least 40,000 alerts per single standard visit, and for visits producing $\leq$40,000 alerts, no more than 1\% of them fail to have at least 98\% of its alerts distributed within 60 seconds of image readout (based on LSR-REQ-0101 in \citeds{LSE-029}; OSS-REQ-0193 in \citeds{LSE-030}; and DMS-REQ-0392 and -0393 in \citeds{LSE-61}).
 
@@ -212,6 +269,7 @@ There is no scientific merit in not distributing delayed alerts, and four furthe
 \end{enumerate}
 
 \textbf{Recommendation}: Flag and distribute delayed alerts as soon as possible to enable time-domain science.
+Alerts should also have a processing timestamp added so that brokers can gauge delay timescales.
 
 \appendix
 % Include all the relevant bib files.
