@@ -131,25 +131,26 @@ The motivation for including postage stamps in the alert packets is to enable br
 machine learning tools (e.g., custom real/bogus scores; host+supernova classifiers), 2-dimenstional flux distribution 
 (e.g., trailed sources; cometary outbursts), or environmental context (e.g., field crowdedness) to classify or prioritze alerts.
 
-Two options to replace including postage stamps in every alert are:
+Two options to replace the inclusion of postage stamps in every alert are:
 \begin{enumerate}
 \item \textbf{Image cutout service}. Brokers with authenticated RSP access could use the image cutout service to 
 create and retrieve stamps.
-\item \textbf{URL to the postage stamp}. A URL to could be put into the alert instead of the postage stamp which 
+\item \textbf{URL to the postage stamp}. A URL could be put into the alert instead of the postage stamp, which 
 points to an automated public cutout service or the pre-made postage stamps on a server.
 \end{enumerate}
 
 Regarding the first option, the 80 hour embargo on all new images and difference images renders the option to use 
 an image cutout service non-viable (regardless of whether it is via the RSP or a public service).
 
-Regarding the second option, this would require Rubin Observatory to create and maintain a public server of 
-pre-made postage stamps has the advantage that brokers (or downstream brokers) do not need to save the stamps, 
-and can retrieve them at any time.
-However, this option also has two main drawbacks: it is not currently planned for development, and it could impose 
-a delay on brokers' alert processing and analysis.
-The latter is unlikely to cause a bottleneck whe multiple brokers attempt to retrieve large numbers of stamps simulataneously.
+The second option has the advantage that brokers (or downstream brokers) do not need to save the stamps and can retrieve 
+them at any time, but a disadvantage that stamp retrieval could add a delay to brokers' alert processing and analysis.
+
+As a side note, the second option is unlikely to cause a bottleneck whe multiple brokers attempt to retrieve large numbers 
+of stamps simulataneously.
 For example, if 5 brokers retrieve 500 stamp sets per visit, that's 2500 stamp sets every 35 seconds, and at 18 KB 
 per stamp set the data rate would be 10.5 Mbps (5\% of one full alert stream).
+However, the second option would require Rubin Observatory to create and maintain a public server of 
+pre-made postage stamps, which is not currently planned for development.
 
 \textbf{Recommendation}: Do not remove postage stamps, it imposes a risk to time-domain science.
 
@@ -204,6 +205,7 @@ Compression should only be consisdered if an algorithm could provide a compressi
 to compress a visit's worth of alerts, or if the alert distribution latency requirement is relaxed from 1 minute.
 
 \textbf{Recommendation}: Do not compress alert packets, it imposes a risk to rapid time-domain science.
+Potentially reconsider compression if it requires only a few seconds per visit.
 
 
 \section{Multiple packet formats}\label{sec:multiformats}
@@ -246,26 +248,39 @@ brokers which will ingest a filtered stream of alerts from the full-stream broke
 
 \section{When and how to distribute delayed alerts}\label{sec:delayed}
 
-The Data Management System (DMS) is required to support the distribution of at least 40,000 alerts per single standard visit, and for visits producing $\leq$40,000 alerts, no more than 1\% of them fail to have at least 98\% of its alerts distributed within 60 seconds of image readout (based on LSR-REQ-0101 in \citeds{LSE-029}; OSS-REQ-0193 in \citeds{LSE-030}; and DMS-REQ-0392 and -0393 in \citeds{LSE-61}).
+The Data Management System (DMS) is required to support the distribution of at least 40,000 alerts per single standard visit, 
+and for visits producing $\leq$40,000 alerts, no more than 1\% of them fail to have at least 98\% of its alerts distributed 
+within 60 seconds of image readout (based on LSR-REQ-0101 in \citeds{LSE-29}; OSS-REQ-0193 in \citeds{LSE-30}; 
+and DMS-REQ-0392 and -0393 in \citeds{LSE-61}).
 
-Furthermore, alert distribution should degrade gracefully beyond that limit, meaning that visits resulting in an excess of 40,000 of alerts should not cause any downtime for the Data Management System (DMS; \citeds{LSE-30}, \citeds{LSE-61}).
-It is also a requirement that all alerts be stored in an archival database and be available for retrieval (OSS-REQ-0185 in \citeds{LSE-030}).
+Furthermore, alert distribution should degrade gracefully beyond that limit, meaning that visits resulting in an excess of 
+40,000 of alerts should not cause any downtime for the Data Management System (DMS; \citeds{LSE-30}, \citeds{LSE-61}).
+It is also a requirement that all alerts be stored in an archival database and be available for retrieval 
+(OSS-REQ-0185 in \citeds{LSE-30}).
 
 This leaves the open question of what, from a science perspective, is the optimal way of dealing with delayed alerts.
-(Aspects of the technical implementation of a graceful degradation, such as distributing delayed alerts and alert archive storage access, are out of scope for this document).
+(Aspects of the technical implementation of a graceful degradation, such as distributing delayed alerts and alert archive 
+storage access, are out of scope for this document).
 
 There are three main options:
 
 \begin{enumerate}
 \item \textbf{Next-opportunity distribution via the alert stream}.
 Distribute delayed alerts as soon as possible.
-There are plenty of science goals that do not absolutely require alert distribution in 1 minute, and so distributing delayed alerts via the stream would still enable plenty of science.
-The brokers might prefer to have delayed alerts clearly flagged to properly process them (e.g., some filtering and processing done by brokers might only be appropriate for alerts delivered within a given latency).
+There are plenty of science goals that do not absolutely require alert distribution in 1 minute, and so distributing delayed 
+alerts via the stream would still enable plenty of science.
+The brokers might prefer to have delayed alerts clearly flagged to properly process them (e.g., some filtering and processing 
+done by brokers might only be appropriate for alerts delivered within a given latency).
 \item \textbf{Next-morning distribution via the alert stream}.
-Collect all delayed alerts during the night and then release them (perhaps on a new topic) all at once in the morning, after survey operations have ended for the night.
-From a science perspective this is not as useful as next-opportunity distribution, but if it is preferred for technical reasons it would enable more science than the option below.
+Collect all delayed alerts during the night and then release them (perhaps on a new topic) all at once in the morning, after 
+survey operations have ended for the night.
+From a science perspective this is not as useful as next-opportunity distribution, but if it is preferred for technical 
+reasons it would enable more science than the option below.
 \item \textbf{Do not distribute delayed alerts; send directly to archive}.
-There is no scientific merit in not distributing delayed alerts, and four further drawbacks: the alert archive update timescale is 24 hours (significantly slower than next-morning distribution); the alert database would only be accessible by brokers with authenticated RSP access; alerts might only be able to be queried by alert ID; and bulk download capabilities might be limited.
+There is no scientific merit in \emph{not} distributing delayed alerts.
+Four futher drawbacks include: the alert archive update timescale is 24 hours (significantly slower than next-morning distribution); 
+the alert database would only be accessible by brokers with authenticated RSP access; alerts might only be able to be queried by 
+alert ID; and bulk download capabilities might be limited.
 \end{enumerate}
 
 \textbf{Recommendation}: Flag and distribute delayed alerts as soon as possible to enable time-domain science.
