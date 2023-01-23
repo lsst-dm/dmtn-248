@@ -82,33 +82,33 @@ delayed alerts when, e.g., there are $>$40000 alerts per visit (Section \ref{sec
 \textbf{Proposal}: Instead of including the history in every packet, brokers could retrieve it only the fraction 
 of the alerts for which it is needed.
 
-Alert packets will include ``\textit{any DiaSource and DiaForcedSource records that exist, and difference image noise
+Alert packets will include ``\textit{any \texttt{DiaSource} and \texttt{DiaForcedSource} records that exist, and difference image noise
 estimates where they do not, taken from the previous 12 months}" (Section 3.5.1 of the DPDD).
 The history would account for about 27 KB, or about 33\% of the total alert packet size.
 
-The motivation for including historical records in alert packets is to enable brokers to (re-)assess the \emph{full} 
+The motivation for including historical records in alert packets is to enable brokers to assess the \emph{full} 
 time-domain event in order to make a robust classification (or prioritization) for follow-up.
 
-Brokers (and their users) would still need the list of the unique identifers for the DiaSource and DiaForcedSource 
-records associated with the same DiaOject as the alert-triggering DiaSource, even if their full records were not included 
+Brokers (and their users) would still need the list of the unique identifers for the \texttt{DiaSource} and \texttt{DiaForcedSource} 
+records associated with the same \texttt{DiaOject} as the alert-triggering \texttt{DiaSource}, even if their full records were not included 
 in the alert packet.
 Removing this list of unique identifiers is \emph{not} being considered as part of this proposal for the following reasons:
 
 \begin{enumerate}
-\item The LSST Prompt Processing pipeline associates DiaSources into DiaObjects, and it would be challenging, time-consuming, 
-and redundant to have brokers repeat this for all new alerts.
-\item The association of DiaSources into DiaObjects is probabilistic, and in rare cases might change over time 
+\item The LSST Prompt Processing pipeline associates \texttt{DiaSources} into \texttt{DiaObjects}, and it would be challenging, time-consuming, 
+and redundant to have brokers repeat this.
+\item The association of \texttt{DiaSources} into \texttt{DiaObjects} is probabilistic, and in rare cases might change over time 
 (e.g., strongly-lensed supernovae, or line-of-sight transient superpositions, where two distinct difference-image sources are 
 blended/separated in poor/good seeing).
-In such cases the set of all DiaSource records which compose the history might change.
+In such cases the set of all \texttt{DiaSource} records which compose the history might change.
 \end{enumerate}
 
-Brokers that save all past alerts in their own archives would be able to retrieve the full records for associated DiaSources 
-locally (but not DiaForcedSources, as they would never have been in an alert packet).
-Brokers with authenticated RSP access would be able to query the PPDB to retrieve the full records for associated DiaSources 
-and DiaForcedSources.
+Brokers that save all past alerts in their own archives would be able to retrieve the full records for associated \texttt{DiaSources} 
+locally (but not \texttt{DiaForcedSources}, as they would never have been in an alert packet).
+Brokers with authenticated RSP access would be able to query the PPDB to retrieve the full records for associated \texttt{DiaSources} 
+and \texttt{DiaForcedSources}.
 Brokers that do not save all past alerts and/or do not have authenticated RSP access to the PPDB would have no historical 
-information aside from the number of associated DiaSources (i.e., the number of past detections).
+information aside from the number of associated \texttt{DiaSources} (i.e., the number of past detections).
 
 At best, the lack of historical records in alerts would add a layer of complication and a potential delay to the brokers' 
 functionailty, and inhibit the scientific assessment of time-domain events.
@@ -168,14 +168,14 @@ The default 6$\times$6 arcsecond postage stamp size is large enough to contain t
 of a Milky Way-like galaxy at a redshift of 0.5, which will be a fairly typical supernova host galaxy in the LSST data set.
 The fraction of all alerts that will be low-redshift transients with wide-area host galaxies will be $<$1\% \citedsp{DMTN-102}.
 
-Host association will already be included in the alert packet as part of the DiaObject, as described in \citeds{DMTN-151} 
+Host association will already be included in the alert packet as part of the \texttt{DiaObject}, as described in \citeds{DMTN-151} 
 and in Table 3 of the DPDD, including potential nearby extended and low-redshift galaxies (see columns nearbyExtObj and nearbyLowzGal).
 
 It is expected that this type of host-galaxy identification could be done by accessing the template images 
 (which are not subject to the 80 hour embargo) via the image cutout service, via which large-area cutouts could be made.
 
-Although the context provided by larger postage stamps have also been shown to better identify DiaSources that are glints
-(rotating debris in low earth orbit that appears as a row of point sources), ways to identify and flag DiaSources
+Although the context provided by larger postage stamps have also been shown to better identify \texttt{DiaSources} that are glints
+(rotating debris in low earth orbit that appears as a row of point sources), ways to identify and flag \texttt{DiaSources}
 as potential glints in the AP pipeline are underway, instead of leaving this identification solely to brokers.
 
 Furthermore, although the multi-resolution aspect of the proposal aims to provide a larger area without significantly
@@ -235,7 +235,7 @@ As with the multiple packet formats, the main motivation here is not scientific,
 spent recieving unwanted alerts, or to enable Rubin Observatory to distribute alerts to more brokers.
 
 For example, due to the exponential relationship between the number of variable stars and their variability amplitude, and 
-also that of volume and distance modulus, an apparent magnitude limit that is 1 mag brighter than the nominal 5-sigma DiaSource 
+also that of volume and distance modulus, an apparent magnitude limit that is 1 mag brighter than the nominal 5-sigma \texttt{DiaSource} 
 detection limit could reduce the alert stream data rate by 50\%.
 
 However, all seven full-stream brokers have committed to recieving the full stream, and the term downstream broker refers to 
