@@ -54,7 +54,7 @@ They are the only data product that is both world public (exempt from any propri
 the latter meaning that they are distributed to community brokers and not solely available via the Rubin Science Platform (RSP).
 
 The alert stream and its packets' contents are described in the Data Products Definitions Document (DPDD; \citeds{LSE-163}).
-The motivation behind their design is to rapidly distribute all of the LSST data about a difference-image detection which a 
+The motivation behind their design is to rapidly distribute all of the LSST data about a difference-image detection that a 
 broker (or their users) would need to assess, classify, and prioritize the alert for follow-up observations within minutes.
 
 This document considers options for the alert stream and alert packet contents to maximize science.
@@ -70,7 +70,7 @@ size are still relevant to, e.g., potentially enable wider full-stream redistrib
 bottlenecks in alert distribution for crowded fields.
 
 \textbf{Improve scientific utility}:
-Other options below aim to improve the scientific utility of alert packet contents by providind additional or 
+Other options below aim to improve the scientific utility of alert packet contents by providing additional or 
 differently-formatted data.
 
 This document also includes a brief discussion about the science impacts for the various ways of dealing with 
@@ -79,7 +79,7 @@ delayed alerts when, e.g., there are $>$40000 alerts per visit (Section \ref{sec
 
 \section{Historical records}\label{sec:histories}
 
-\textbf{Proposal}: Instead of including the history in every packet, brokers could retrieve it only the fraction 
+\textbf{Proposal}: Instead of including the history in every packet, brokers could retrieve it for only the fraction 
 of the alerts for which it is needed.
 
 Alert packets will include ``\textit{any \texttt{DiaSource} and \texttt{DiaForcedSource} records that exist, and difference image noise
@@ -125,7 +125,7 @@ with which brokers could instead retrieve the postage stamps for only those aler
 
 The postage stamps are, at minimum, 6$\times$6 arcseconds (30$\times$30 pixels) and contain flux, variance, 
 and mask extensions for both the template and difference image, plus a header of metadata (DPDD).
-The stamps would accounts for about 18 KB, or about 20\% of the total alert packet size.
+The stamps would account for about 18 KB, or about 20\% of the total alert packet size.
 
 The motivation for including postage stamps in the alert packets is to enable brokers to use image-based 
 machine learning tools (e.g., custom real/bogus scores; host+supernova classifiers), 2-dimenstional flux distribution 
@@ -145,7 +145,7 @@ an image cutout service non-viable (regardless of whether it is via the RSP or a
 The second option has the advantage that brokers (or downstream brokers) do not need to save the stamps and can retrieve 
 them at any time, but a disadvantage that stamp retrieval could add a delay to brokers' alert processing and analysis.
 
-As a side note, the second option is unlikely to cause a bottleneck whe multiple brokers attempt to retrieve large numbers 
+As a side note, the second option is unlikely to cause a bottleneck when multiple brokers attempt to retrieve large numbers 
 of stamps simulataneously.
 For example, if 5 brokers retrieve 500 stamp sets per visit, that's 2500 stamp sets every 35 seconds, and at 18 KB 
 per stamp set the data rate would be 10.5 Mbps (5\% of one full alert stream).
@@ -201,7 +201,7 @@ For example, gzip compression at 50 MB/s to compress 10000 alerts could take 100
 Furthermore, compressing the alert packets forces brokers to then decompress the alerts on arrival, which would incur further delay.
 Science goals requiring very low-latency alerts distribution might be negatively impacted by compression.
 
-Compression should only be consisdered if an algorithm could provide a compression rate of 10 MB/s, requiring only a few seconds 
+Compression would only be viable if an algorithm could provide a compression rate of 10 MB/s, requiring only a few seconds 
 to compress a visit's worth of alerts, or if the alert distribution latency requirement is relaxed from 1 minute.
 
 \textbf{Recommendation}: Do not compress alert packets, it imposes a risk to rapid time-domain science.
@@ -241,7 +241,7 @@ also that of volume and distance modulus, an apparent magnitude limit that is 1 
 detection limit could reduce the alert stream data rate by 50\%.
 
 However, all seven full-stream brokers have committed to recieving the full stream, and the term downstream broker refers to 
-brokers which will ingest a filtered stream of alerts from the full-stream brokers.
+brokers which will ingest a filtered stream of alerts from one or more full-stream brokers.
 
 \textbf{Recommendation}: There is no need for Rubin Observatory to provide pre-filtered streams to brokers.
 
@@ -249,7 +249,7 @@ brokers which will ingest a filtered stream of alerts from the full-stream broke
 \section{When and how to distribute delayed alerts}\label{sec:delayed}
 
 The Data Management System (DMS) is required to support the distribution of at least 40,000 alerts per single standard visit, 
-and for visits producing $\leq$40,000 alerts, no more than 1\% of them fail to have at least 98\% of its alerts distributed 
+and for visits producing $\leq$40,000 alerts, no more than 1\% of them may fail to have at least 98\% of their alerts distributed 
 within 60 seconds of image readout (based on LSR-REQ-0101 in \citeds{LSE-29}; OSS-REQ-0193 in \citeds{LSE-30}; 
 and DMS-REQ-0392 and -0393 in \citeds{LSE-61}).
 
