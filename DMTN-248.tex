@@ -202,10 +202,9 @@ Furthermore, compressing the alert packets forces brokers to then decompress the
 Science goals requiring very low-latency alerts distribution might be negatively impacted by compression.
 
 Compression would only be viable if an algorithm could provide a compression rate of 10 MB/s, requiring only a few seconds 
-to compress a visit's worth of alerts, or if the alert distribution latency requirement is relaxed from 1 minute.
+to compress a visit's worth of alerts.
 
 \textbf{Recommendation}: Do not compress alert packets, it imposes a risk to rapid time-domain science.
-Potentially reconsider compression if it requires only a few seconds per visit.
 
 
 \section{Multiple packet formats}\label{sec:multiformats}
@@ -218,14 +217,14 @@ from alert packets.
 There are a few drawbacks to this proposal, but they are mostly technical:
 
 \begin{enumerate}
-\item New scope, as the current plan is for Prompt Processing to create a uniform alert packet.
+\item New scope, as the current plan is for Prompt Processing to create a uniform alert packet, and this would create additional provenance work for Rubin (i.e., tracking which alerts were sent to which broker).
 \item Streams of full-sized packets could unfairly suffer delays more often (e.g., in crowded fields).
 \item Non-identical packets might cause bookkeeping issues for downstream brokers subscribing to multiple brokers.
 \end{enumerate}
 
 These drawbacks could impose a risk to the particular science goals of brokers using full-sized or non-identical alerts.
 
-\textbf{Recommendation}: None at this time, this is primarily a technical question with little science impact.
+\textbf{Recommendation}: Do not offer multiple packet formats.
 
 
 \section{Pre-filtered streams}\label{sec:prefilter}
@@ -248,8 +247,8 @@ brokers which will ingest a filtered stream of alerts from one or more full-stre
 
 \section{When and how to distribute delayed alerts}\label{sec:delayed}
 
-The Data Management System (DMS) is required to support the distribution of at least 40,000 alerts per single standard visit, 
-and for visits producing $\leq$40,000 alerts, no more than 1\% of them may fail to have at least 98\% of their alerts distributed 
+The Data Management System (DMS) is required to support the distribution of at least 40,000 alerts per single standard visit.
+Furthermore, for visits producing $\leq$40,000 alerts, no more than 1\% of them may fail to have at least 98\% of their alerts distributed 
 within 60 seconds of image readout (based on LSR-REQ-0101 in \citeds{LSE-29}; OSS-REQ-0193 in \citeds{LSE-30}; 
 and DMS-REQ-0392 and -0393 in \citeds{LSE-61}).
 
