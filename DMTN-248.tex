@@ -194,14 +194,8 @@ The application of gzip compression could further reduce the size of a full aler
 This might help to avoid alert distribution bottlenecks, lower the cost for brokers' storage needs, and potentially enable 
 additional full streams in the future -- all of which could positively impact time-domain science with the LSST.
 
-The time and computational resources required to compress the alert packets needs to be considered.
-For a ballpark estimate, a quick search for "how fast is gzip compression" yeilds a rate of 50 MB/s.
-For 50-200 alerts per ccd, that's only 16 MB to be compressed to 13 MB, and it would take about 0.32 seconds;
-not a significant fraction of the 60 second alert production latency budgent.
-
-However, compressing the alert packets forces brokers to then decompress the alerts on arrival, which would incur further delay.
-Science goals requiring very low-latency alerts distribution might be negatively impacted by compression.
-In general, it seems that compressing alert packets would increase complexity for an only modest gain in storage space.
+At this point we don't believe we need to sacrifice latency in order to achieve bandwidth savings, but 
+we may revisit this tradeoff as we begin testing alert distribution at scale in the USDF.
 
 \textbf{Recommendation}: Do not compress alert packets, it imposes a risk to rapid time-domain science.
 
